@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bloom Mode Journal</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&family=Quicksand&display=swap');
+
+    /* Reset & base */
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      font-family: 'Quicksand', sans-serif;
+      background: #fffaf6;
+      color: #4a4a4a;
+      overflow-x: hidden;
+    }
+    h1, h2 {
+      font-family: 'Great Vibes', cursive;
+      color: #6b4f4f;
+      margin-bottom: 8px;
+    }
+
+    /* Container */
+    .app {
+      max-width: 700px;
+      margin: 2rem auto;
+      padding: 1rem 2rem;
+      background: #fff9f4;
+      border-radius: 24px;
+      box-shadow: 0 0 15px rgba(107, 79, 79, 0.15);
+      position: relative;
+    }
+
+    /* Flower animations */
+    .flower {
+      position: fixed;
+      width: 40px;
+      height: 40px;
+      background: radial-gradient(circle at center, #ffb7c5 30%, transparent 70%);
+      border-radius: 50%;
+      animation: floatFlower 10s linear infinite;
+      filter: drop-shadow(0 0 2px #e17090);
+      pointer-events: none;
+      z-index: 1;
+    }
+    @keyframes floatFlower {
+      0% {transform: translateY(0) translateX(0);}
+      50% {transform: translateY(-20px) translateX(10px);}
+      100% {transform: translateY(0) translateX(0);}
+    }
+
+    /* Navigation */
+    nav {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+      gap: 16px;
+    }
+    nav button {
+      background: transparent;
+      border: 2px solid #d5989b;
+      border-radius: 50px;
+      padding: 6px 18px;
+      font-weight: 600;
+      color: #a45455;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    nav button.active,
+    nav button:hover {
+      background: #d5989b;
+      color: white;
+      box-shadow: 0 0 6px #d5989b;
+    }
+
+    /* Page styles */
+    .page {
+      display: none;
+      animation: fadeIn 0.6s ease forwards;
+    }
+    .page.active {
+      display: block;
+    }
+    @keyframes fadeIn {
+      from {opacity: 0;}
+      to {opacity: 1;}
+    }
+
+    /* Inputs & textareas */
+    textarea, input[type="text"] {
+      width: 100%;
+      font-family: 'Quicksand', sans-serif;
+      font-size: 1rem;
+      padding: 10px;
+      margin: 6px 0 16px 0;
+      border: 2px solid #d5989b;
+      border-radius: 12px;
+      resize: vertical;
+      transition: border-color 0.3s ease;
+    }
+    textarea:focus, input[type="text"]:focus {
+      border-color: #a45455;
+      outline: none;
+      box-shadow: 0 0 5px #a45455;
+    }
+
+    /* Mood emojis scale */
+    .mood-scale {
+      font-size: 2rem;
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      user-select: none;
+      margin-bottom: 20px;
+    }
+    .mood-scale span {
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+    .mood-scale span:hover {
+      transform: scale(1.4);
+    }
+    .mood-scale span.selected {
+      transform: scale(1.8);
+      filter: drop-shadow(0 0 4px #a45455);
+    }
+
+    /* Save button */
+    button.save-btn {
+      background-color: #a45455;
+      border: none;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 24px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      box-shadow: 0 4px 6px rgba(164, 84, 85, 0.5);
+      transition: background-color 0.3s ease;
+      margin-top: 12px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    button.save-btn:hover {
+      background-color: #6b3b3b;
+    }
+
+    /* Quotes */
+    blockquote {
+      font-style: italic;
+      color: #9b6b6b;
+      margin: 16px 0;
+      padding-left: 16px;
+      border-left: 3px solid #d5989b;
+    }
+
+    /* Canvas for doodles */
+    #doodleCanvas {
+      border: 2px solid #d5989b;
+      border-radius: 12px;
+      width: 100%;
+      height: 200px;
+      cursor: crosshair;
+      background: #fff5f5;
+      margin-bottom: 16px;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="flower" style="top: 10vh; left: 10vw; animation-delay: 0s;"></div>
+  <div class="flower" style="top: 20vh; left: 80vw; animation-delay: 2s;"></div>
+  <div class="flower" style="top: 70vh; left: 15vw; animation-delay: 4s;"></div>
+
+  <div class="app">
+    <h1>🌸 Bloom Mode Journal</h1>
+
+    <nav>
+      <button class="nav-btn active" data-page="reflections">Personal Reflections</button>
+      <button class="nav-btn" data-page="creative">Creative Expression</button>
+      <button class="nav-btn" data-page="fun">Fun Additions</button>
+      <button class="nav-btn" data-page="relationship">Relationship Stuff</button>
+      <button class="nav-btn" data-page="growth">Self-Growth</button>
+    </nav>
+
+    <!-- Personal Reflections Page -->
+    <section class="page active" id="reflections">
+      <h2>Daily Mood Check-in 😊</h2>
+      <div class="mood-scale" id="moodScale">
+        <span data-value="1" title="Very Sad">😞</span>
+        <span data-value="2" title="Sad">😕</span>
+        <span data-value="3" title="Neutral">😐</span>
+        <span data-value="4" title="Happy">🙂</span>
+        <span data-value="5" title="Very Happy">😄</span>
+      </div>
+
+      <h2>Lessons Learned 📚</h2>
+      <textarea id="lessons" rows="3" placeholder="What did you learn today or this week?"></textarea>
+
+      <h2>Gratitude List 🙏</h2>
+      <textarea id="gratitude" rows="3" placeholder="Write 3-5 things you are grateful for..."></textarea>
+
+      <h2>Dream Journal 🌙</h2>
+      <textarea id="dreams" rows="3" placeholder="Record your dreams and reflections..."></textarea>
+
+      <h2>Prayer / Devotional Thoughts 🙌</h2>
+      <textarea id="prayer" rows="3" placeholder="Write a short prayer or spiritual thought..."></textarea>
+
+      <blockquote id="quoteReflections">“Loading inspiring quote...”</blockquote>
+
+      <button class="save-btn" onclick="saveReflections()">Save Reflections</button>
+    </section>
+
+    <!-- Creative Expression Page -->
+    <section class="page" id="creative">
+      <h2>Doodles & Sketches 🎨</h2>
+      <canvas id="doodleCanvas"></canvas>
+      <button onclick="clearDoodle()" style="margin-bottom: 16px;">Clear Doodle</button>
+
+      <h2>Poems / Short Stories ✍️</h2>
+      <textarea id="poems" rows="4" placeholder="Write your poem or story here..."></textarea>
+
+      <h2>Quotes That Inspire 💬</h2>
+      <textarea id="quoteText" rows="3" placeholder="Add your favorite quotes..."></textarea>
+
+      <h2>Song Lyrics 🎵</h2>
+      <textarea id="lyrics" rows="3" placeholder="Write lyrics that match your vibe..."></textarea>
+
+      <blockquote id="quoteCreative">“Loading creative quote...”</blockquote>
+
+      <button class="save-btn" onclick="saveCreative()">Save Creative</button>
+    </section>
+
+    <!-- You want me to add other pages too like Fun, Relationship, and Growth? -->
+  </div>
+
+  <script>
+    // --- Navigation ---
+    const navButtons = document.querySelectorAll('.nav-btn');
+    const pages = document.querySelectorAll('.page');
+
+    navButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        navButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        pages.forEach(page => {
+          if(page.id === btn.dataset.page) {
+            page.classList.add('active');
+          } else {
+            page.classList.remove('active');
+          }
+        });
+
+        loadPageData(btn.dataset.page);
+      });
+    });
+
+    // --- Mood Scale ---
+    const moodScale = document.getElementById('moodScale');
+    let selectedMood = null;
+    moodScale.querySelectorAll('span').forEach(emoji => {
+      emoji.addEventListener('click', () => {
+        moodScale.querySelectorAll('span').forEach(e => e.classList.remove('selected'));
+        emoji.classList.add('selected');
+        selectedMood = emoji.dataset.value;
+      });
+    });
+
+    // --- Quotes ---
+    const reflectionQuotes = [
+      "Every day may not be good, but there is something good in every day.",
+      "Gratitude turns what we have into enough.",
+      "Dream big, work hard, stay humble.",
+      "Prayer is the key of the morning and the bolt of the evening.",
+      "The best way out is always through."
+    ];
+    const creativeQuotes = [
+      "Creativity takes courage. – Henri Matisse",
+      "Art washes away from the soul the dust of everyday life. – Pablo Picasso",
+      "To practice any art, no matter how well or badly, is a way to make your soul grow.",
+      "Poetry is when an emotion has found its thought and the thought has found words.",
+      "Music expresses that which cannot be put into words."
+    ];
+
+    function randomQuote(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+    document.getElementById('quoteReflections').textContent = randomQuote(reflectionQuotes);
+    document.getElementById('quoteCreative').textContent = randomQuote(creativeQuotes);
+
+    // --- Save and Load data ---
+    function saveReflections() {
+      const data = {
+        mood: selectedMood,
+        lessons: document.getElementById('lessons').value,
+        gratitude: document.getElementById('gratitude').value,
+        dreams: document.getElementById('dreams').value,
+        prayer: document.getElementById('prayer').value
+      };
+      localStorage.setItem('bloom_reflections', JSON.stringify(data));
+      alert('Reflections saved!');
+    }
+    function loadReflections() {
+      const data = JSON.parse(localStorage.getItem('bloom_reflections'));
+      if(data) {
+        selectedMood = data.mood;
+        document.getElementById('lessons').value = data.lessons || '';
+        document.getElementById('gratitude').value = data.gratitude || '';
+        document.getElementById('dreams').value = data.dreams || '';
+        document.getElementById('prayer').value = data.prayer || '';
+        if(selectedMood) {
+          moodScale.querySelectorAll('span').forEach(e => e.classList.remove('selected'));
+          const moodElem = moodScale.querySelector(`span[data-value="${selectedMood}"]`);
+          if(moodElem) moodElem.classList.add('selected');
+        }
+      }
+    }
+    function saveCreative() {
+      const data = {
+        poems: document.getElementById('poems').value,
+        quotes: document.getElementById('quoteText').value,
+        lyrics: document.getElementById('lyrics').value,
+        doodle: canvas.toDataURL()
+      };
+      localStorage.setItem('bloom_creative', JSON.stringify(data));
+      alert('Creative Expression saved!');
+    }
+    function loadCreative() {
+      const data = JSON.parse(localStorage.getItem('bloom_creative'));
+      if(data) {
+        document.getElementById('poems').value = data.poems || '';
+        document.getElementById('quoteText').value = data.quotes || '';
+        document.getElementById('lyrics').value = data.lyrics || '';
+        if(data.doodle) loadDoodle(data.doodle);
+      }
+    }
+
+    // --- Canvas Doodle ---
+    const canvas = document.getElementById('doodleCanvas');
+    const ctx = canvas.getContext('2d');
+    let drawing = false;
+
+    function resizeCanvas() {
+      canvas.width = canvas.clientWidth;
+      canvas.height = canvas.clientHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    canvas.addEventListener('mousedown', e => {
+      drawing = true;
+      ctx.beginPath();
+      ctx.moveTo(e.offsetX, e.offsetY);
+    });
+    canvas.addEventListener('mousemove', e => {
+      if(drawing) {
+        ctx.lineTo(e.offsetX, e.offsetY);
+        ctx.strokeStyle = '#a45455';
+        ctx.lineWidth = 3;
+        ctx.lineCap = 'round';
+        ctx.stroke();
+      }
+    });
+    canvas.addEventListener('mouseup', () => { drawing = false; });
+    canvas.addEventListener('mouseout', () => { drawing = false; });
+
+    function clearDoodle() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+    function loadDoodle(dataURL) {
+      let img = new Image();
+      img.onload = () => ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      img.src = dataURL;
+    }
+
+    // Load data on page load
+    function loadPageData(page) {
+      if(page === 'reflections') loadReflections();
+      if(page === 'creative') loadCreative();
+      // Future pages to add
+    }
+    loadReflections();
+
+  </script>
+</body>
+</html>
